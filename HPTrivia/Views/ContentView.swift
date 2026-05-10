@@ -20,19 +20,25 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                hogwartsBackground(proxy: proxy)
+                HogwartsBackgroundView(proxy: proxy)
                 VStack {
-                    titleView
+                    GameTitleView(animateViewIn: $animateViewIn)
                     Spacer()
-                    recentScoreView
+                    RecentScoreView(animateViewIn: $animateViewIn)
                     Spacer()
                     HStack {
                         Spacer()
-                        instructionButton(x: -proxy.size.height/3)
+                        InstructionButton(animateViewIn: $animateViewIn,
+                                          showInstructions: $showInstructions,
+                                          x: -proxy.size.height/3)
                         Spacer()
-                        playButton(y: proxy.size.height/3)
+                        PlayButton(animateViewIn: $animateViewIn,
+                                   playGame: $playGame,
+                                   scalePlayButton: $scalePlayButton, y: proxy.size.height/3)
                         Spacer()
-                        settingsButton(x: proxy.size.height/3)
+                        SettingsButton(animateViewIn: $animateViewIn,
+                                       showSettings: $showSettings,
+                                       x: proxy.size.height/3)
                         Spacer()
                     }
                     .frame(width: proxy.size.width)
@@ -55,84 +61,7 @@ struct ContentView: View {
     }
 }
 
-extension ContentView {
-    
-    func hogwartsBackground(proxy: GeometryProxy) -> some View {
-        Image(.hogwarts)
-            .resizable()
-            .frame(width: proxy.size.width * 3, height: proxy.size.height)
-            .padding(.top)
-            .phaseAnimator([false, true]) { content, phase in
-                content
-                    .offset(x: phase ? proxy.size.width/1.1 : -proxy.size.width/1.1)
-            } animation: { _ in
-                    .linear(duration: 60)
-            }
-    }
-    
-    var titleView: some View {
-        VStack {
-            if animateViewIn {
-                VStack {
-                    Image(systemName: "bolt.fill")
-                        .imageScale(.large)
-                        .font(.largeTitle)
-                    Text("HP")
-                        .font(.custom("PartyLetPlain", size: 70))
-                        .padding(.bottom, -50)
-                    
-                    Text("Trivia")
-                        .font(.custom("PartyLetPlain", size: 60))
-                }
-                .padding(.top, 70)
-                .transition(.move(edge: .top))
-            }
-        }
-        .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
-    }
-    
-    var recentScoreView: some View {
-        VStack {
-            if animateViewIn {
-                VStack {
-                    Text("Recent Scores")
-                        .font(.title2)
-                    Text("33")
-                    Text("27")
-                    Text("15")
-                }
-                .font(.title3)
-                .foregroundStyle(.white)
-                .padding(.horizontal)
-                .background(.black.opacity(0.7))
-                .cornerRadius(15)
-                .transition(.opacity)
-            }
-        }
-        .animation(.linear(duration: 1).delay(0.7), value: animateViewIn)
-    }
-    
-    func playButton(y: Double) -> some View {
-        VStack {
-            if animateViewIn {
-                Button {
-                    playGame.toggle()
-                } label: {
-                    Text("Play")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .padding(.vertical, 7)
-                        .padding(.horizontal, 50)
-                        .background(.brown)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .shadow(radius: 10)
-                        .scaleEffect(scalePlayButton ? 1.2 : 1)
-                }
-                .transition(.offset(y: y))
-            }
-        }
-        .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
-    }
+private extension ContentView {
     
     private func playAudioMagicInTheAir() {
         guard let sound = Bundle.main.path(forResource: "magic-in-the-air", ofType: "mp3") else {
@@ -146,40 +75,6 @@ extension ContentView {
         } catch {
             print("Error while playing audio magic-in-the-air.mp3")
         }
-    }
-    
-    func instructionButton(x: Double) -> some View {
-        VStack {
-            if animateViewIn {
-                Button {
-                    showInstructions.toggle()
-                } label: {
-                    Image(systemName: "info.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .shadow(radius: 10)
-                }
-                .transition(.offset(x: x))
-            }
-        }
-        .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
-    }
-    
-    func settingsButton(x: Double) -> some View {
-        VStack {
-            if animateViewIn {
-                Button {
-                    showSettings.toggle()
-                } label: {
-                    Image(systemName: "gear")
-                        .font(.largeTitle)
-                        .foregroundStyle(.white)
-                        .shadow(radius: 10)
-                }
-                .transition(.offset(x: x))
-            }
-        }
-        .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
     }
 }
 
