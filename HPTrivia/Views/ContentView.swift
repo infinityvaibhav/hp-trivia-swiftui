@@ -24,7 +24,7 @@ struct ContentView: View {
                 VStack {
                     titleView
                     Spacer()
-                    Spacer()
+                    recentScoreView
                     Spacer()
                     HStack {
                         Spacer()
@@ -89,6 +89,27 @@ extension ContentView {
             }
         }
         .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
+    }
+    
+    var recentScoreView: some View {
+        VStack {
+            if animateViewIn {
+                VStack {
+                    Text("Recent Scores")
+                        .font(.title2)
+                    Text("33")
+                    Text("27")
+                    Text("15")
+                }
+                .font(.title3)
+                .foregroundStyle(.white)
+                .padding(.horizontal)
+                .background(.black.opacity(0.7))
+                .cornerRadius(15)
+                .transition(.opacity)
+            }
+        }
+        .animation(.linear(duration: 1).delay(0.7), value: animateViewIn)
     }
     
     func playButton(y: Double) -> some View {
