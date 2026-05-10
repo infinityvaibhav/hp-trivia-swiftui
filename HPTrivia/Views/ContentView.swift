@@ -13,9 +13,7 @@ struct ContentView: View {
     @State private var audioPlayer: AVAudioPlayer!
     @State private var animateViewIn = false
     @State private var scalePlayButton = false
-    @State private var showInstructions = false
-    @State private var showSettings = false
-    @State private var playGame = false
+    
     
     var body: some View {
         GeometryReader { proxy in
@@ -29,15 +27,13 @@ struct ContentView: View {
                     HStack {
                         Spacer()
                         InstructionButton(animateViewIn: $animateViewIn,
-                                          showInstructions: $showInstructions,
                                           x: -proxy.size.height/3)
                         Spacer()
                         PlayButton(animateViewIn: $animateViewIn,
-                                   playGame: $playGame,
-                                   scalePlayButton: $scalePlayButton, y: proxy.size.height/3)
+                                   scalePlayButton: $scalePlayButton,
+                                   y: proxy.size.height/3)
                         Spacer()
                         SettingsButton(animateViewIn: $animateViewIn,
-                                       showSettings: $showSettings,
                                        x: proxy.size.height/3)
                         Spacer()
                     }
@@ -54,9 +50,6 @@ struct ContentView: View {
             withAnimation(.easeInOut(duration: 1.3).repeatForever()) {
                 scalePlayButton.toggle()
             }
-        }
-        .sheet(isPresented: $showInstructions) {
-            InstructionsView()
         }
     }
 }
@@ -80,4 +73,5 @@ private extension ContentView {
 
 #Preview {
     ContentView()
+        .environment(GameViewModel())
 }

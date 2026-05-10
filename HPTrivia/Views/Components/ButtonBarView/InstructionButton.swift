@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InstructionButton: View {
     @Binding var animateViewIn: Bool
-    @Binding var showInstructions: Bool
+    @State var showInstructions: Bool = false
     let x: Double
     var body: some View {
         VStack {
@@ -26,5 +26,8 @@ struct InstructionButton: View {
             }
         }
         .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
+        .sheet(isPresented: $showInstructions) {
+            InstructionsView()
+        }
     }
 }

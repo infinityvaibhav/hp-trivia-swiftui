@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsButton: View {
     @Binding var animateViewIn: Bool
-    @Binding var showSettings: Bool
+    @State var showSettings = false
     let x: Double
     var body: some View {
         VStack {
@@ -26,5 +26,15 @@ struct SettingsButton: View {
             }
         }
         .animation(.easeOut(duration: 0.7).delay(0.2), value: animateViewIn)
+        .sheet(isPresented: $showSettings) {
+            SelectBooksView()
+        }
+    }
+}
+
+#Preview {
+    GeometryReader { proxy in
+        SettingsButton(animateViewIn: .constant(true), x: proxy.size.width/4)
+            .environment(GameViewModel())
     }
 }

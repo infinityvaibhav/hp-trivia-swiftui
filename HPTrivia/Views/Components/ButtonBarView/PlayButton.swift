@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PlayButton: View {
     @Binding var animateViewIn: Bool
-    @Binding var playGame: Bool
+    @State private var playGame = false
     @Binding var scalePlayButton: Bool
     let y: Double
     var body: some View {

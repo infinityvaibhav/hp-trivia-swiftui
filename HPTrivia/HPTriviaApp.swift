@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct HPTriviaApp: App {
+    private var gameViewModel = GameViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(gameViewModel)
         }
     }
 }
