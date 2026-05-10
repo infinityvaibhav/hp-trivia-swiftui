@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct ContentView: View {
     
+    @State private var audioPlayer: AVAudioPlayer!
     @State private var animateViewIn = false
     
     var body: some View {
@@ -53,6 +55,21 @@ struct ContentView: View {
         .ignoresSafeArea()
         .onAppear {
             animateViewIn = true
+//            playAudioMagicInTheAir()
+        }
+    }
+    
+    private func playAudioMagicInTheAir() {
+        guard let sound = Bundle.main.path(forResource: "magic-in-the-air", ofType: "mp3") else {
+            print("Error while playing audio magic-in-the-air.mp3")
+            return
+        }
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: URL(filePath: sound))
+            audioPlayer.numberOfLoops = -1
+            audioPlayer.play()
+        } catch {
+            print("Error while playing audio magic-in-the-air.mp3")
         }
     }
 }
