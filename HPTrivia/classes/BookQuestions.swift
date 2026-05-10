@@ -46,5 +46,9 @@ class BookQuestions {
         books.append(Book(id: 6, image: "hp6", questions: questions[6], status: .locked))
         books.append(Book(id: 7, image: "h76", questions: questions[7], status: .locked))
     }
+    
+    func changeBookStatus(of id: Int, to status: BookStatus) {
+        books[id-1].status = status
+    }
 }
 

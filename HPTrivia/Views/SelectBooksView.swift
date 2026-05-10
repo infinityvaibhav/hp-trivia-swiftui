@@ -13,6 +13,8 @@ struct SelectBooksView: View {
     
     @Environment(GameViewModel.self) var gameViewModel
     
+    @State var showTempAlert = false
+    
     var body: some View {
         ZStack {
             Image(.parchment)
@@ -30,33 +32,27 @@ struct SelectBooksView: View {
                         ForEach(gameViewModel.bookQuestions.books) { book in
                             switch book.status {
                             case .active:
-                                ZStack(alignment: .bottomTrailing) {
-                                    Image(book.image)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .shadow(radius: 10)
-                                    
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.largeTitle)
-                                        .imageScale(.large)
-                                        .foregroundStyle(.green)
-                                        .shadow(radius: 1)
-                                        .padding(5)
-                                }
+                                SelectBookCellView(book: book, bookStatusImage: "checkmark.circle.fill")
+                                    .onTapGesture {
+                                        gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .inactive)
+                                    }
                             case .inactive:
-                                ZStack {
-                                    Image(book.image)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .shadow(radius: 10)
-                                }
+                                SelectBookCellView(book: book, bookStatusImage: "circle")
+                                    .overlay {
+                                        Rectangle().opacity(0.33)
+                                    }
+                                    .onTapGesture {
+                                        gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
+                                    }
                             case .locked:
-                                ZStack {
-                                    Image(book.image)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .shadow(radius: 10)
-                                }
+                                SelectBookCellView(book: book, bookStatusImage: "lock.fill")
+                                    .overlay {
+                                        Rectangle().opacity(0.5)
+                                    }
+                                    .onTapGesture {
+                                        showTempAlert.toggle()
+                                        gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
+                                    }
                             }
                         }
                     }
@@ -73,6 +69,9 @@ struct SelectBooksView: View {
                 .foregroundStyle(.white)
                 .foregroundStyle(.black)
             }
+        }
+        .alert("You purchased a new question pack.", isPresented: $showTempAlert) {
+            
         }
     }
 }
