@@ -11,6 +11,7 @@ struct SelectBookCellView: View {
     let book: Book
     @Environment(GameViewModel.self) var gameViewModel
     let bookStatusImage: String
+    let opacity: Double
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -25,6 +26,9 @@ struct SelectBookCellView: View {
                 .foregroundStyle(.green)
                 .shadow(radius: 1)
                 .padding(5)
+        }
+        .overlay {
+            Rectangle().opacity(opacity)
         }
     }
 }

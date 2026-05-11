@@ -30,6 +30,6 @@ App Development plan
  - In App purchaes
  - Store
  ✅ Instructions screen
- - Books
+ 🟨 Books
  - Persist scores
 */

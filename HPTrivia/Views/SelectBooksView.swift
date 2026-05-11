@@ -32,23 +32,23 @@ struct SelectBooksView: View {
                         ForEach(gameViewModel.bookQuestions.books) { book in
                             switch book.status {
                             case .active:
-                                SelectBookCellView(book: book, bookStatusImage: "checkmark.circle.fill")
+                                SelectBookCellView(book: book,
+                                                   bookStatusImage: "checkmark.circle.fill",
+                                                   opacity: 0)
                                     .onTapGesture {
                                         gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .inactive)
                                     }
                             case .inactive:
-                                SelectBookCellView(book: book, bookStatusImage: "circle")
-                                    .overlay {
-                                        Rectangle().opacity(0.33)
-                                    }
+                                SelectBookCellView(book: book,
+                                                   bookStatusImage: "circle",
+                                                   opacity: 0.33)
                                     .onTapGesture {
                                         gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
                                     }
                             case .locked:
-                                SelectBookCellView(book: book, bookStatusImage: "lock.fill")
-                                    .overlay {
-                                        Rectangle().opacity(0.5)
-                                    }
+                                SelectBookCellView(book: book,
+                                                   bookStatusImage: "lock.fill",
+                                                   opacity: 0.5)
                                     .onTapGesture {
                                         showTempAlert.toggle()
                                         gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
@@ -57,6 +57,11 @@ struct SelectBooksView: View {
                         }
                     }
                     .padding()
+                }
+                
+                if !activeBooks {
+                    Text("You must select atleast one book")
+                        .multilineTextAlignment(.center)
                 }
                 
                 Button("Done") {
@@ -68,11 +73,15 @@ struct SelectBooksView: View {
                 .tint(.brown.mix(with: .black, by: 0.2))
                 .foregroundStyle(.white)
                 .foregroundStyle(.black)
+                .disabled(!activeBooks)
             }
         }
-        .alert("You purchased a new question pack.", isPresented: $showTempAlert) {
-            
-        }
+        .interactiveDismissDisabled(!activeBooks)
+        .alert("You purchased a new question pack.", isPresented: $showTempAlert) {}
+    }
+    
+    var activeBooks: Bool {
+        gameViewModel.bookQuestions.books.contains { $0.status == .active }
     }
 }
 
