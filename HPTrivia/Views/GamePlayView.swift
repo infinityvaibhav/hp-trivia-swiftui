@@ -17,6 +17,7 @@ struct GamePlayView: View {
     @State private var sfxPlayer: AVAudioPlayer!
     
     @State private var animateView = false
+    @State private var revealHint = false
     
     var body: some View {
         GeometryReader { proxy in
@@ -30,7 +31,7 @@ struct GamePlayView: View {
                     }
                 
                 VStack {
-                   // MARK: Controls
+                    // MARK: Controls
                     HStack {
                         Button("End Game") {
                             gameViewModel.endGame()
@@ -43,7 +44,8 @@ struct GamePlayView: View {
                     }
                     .padding()
                     .padding(.vertical, 30)
-                   // MARK: Questions
+                    
+                    // MARK: Questions
                     VStack {
                         if animateView {
                             Text(gameViewModel.currentQuestion!.question)
@@ -55,8 +57,53 @@ struct GamePlayView: View {
                     }
                     .animation(.easeInOut(duration: 2), value: animateView)
                     Spacer()
-                   // MARK: Hints
-                   // MARK: Answers
+                    
+                    // MARK: Hints
+                    HStack {
+                        VStack {
+                            if animateView {
+                                Image(systemName: "questionmark.app.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100)
+                                    .foregroundStyle(.cyan)
+                                    .padding()
+                                    .transition(.offset(x: -proxy.size.width/2))
+                                    .phaseAnimator([false, true]) { content, phase  in
+                                        content.rotationEffect(.degrees(phase ? -13 : -18))
+                                    } animation: { _ in
+                                            .easeInOut(duration: 0.7)
+                                    }.onTapGesture {
+                                        withAnimation(.easeInOut(duration: 1)) {
+                                            revealHint.toggle()
+                                        }
+                                        playFlipAudio()
+                                        gameViewModel.questionScore -= 1
+                                    }
+                                    .rotation3DEffect(.degrees(revealHint ? 1440 : 0), axis: (x: 0, y: 1, z: 0))
+                                    .scaleEffect(revealHint ? 5 : 1)
+                                    .offset(x: revealHint ? proxy.size.width/2 : 0)
+                                    .opacity(revealHint ? 0 : 1)
+                                    .overlay {
+                                        if let hint = gameViewModel.currentQuestion?.hint {
+                                            Text(hint)
+                                                .padding(.leading, 20)
+                                                .minimumScaleFactor(0.5)
+                                                .multilineTextAlignment(.center)
+                                                .opacity(revealHint ? 1  : 0)
+                                                .scaleEffect(revealHint ? 1.33 : 1)
+                                        }
+                                    }
+                            }
+                        }
+                        .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
+                        
+                        Spacer()
+                    }
+                    .padding()
+                
+                    // MARK: Answers
+                    Spacer()
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 
