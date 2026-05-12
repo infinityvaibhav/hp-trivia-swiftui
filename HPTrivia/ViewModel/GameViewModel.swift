@@ -16,8 +16,26 @@ class GameViewModel {
     
     var activeQuestions: [Question] = []
     var answeredQuestions: [Int] = []
-    var currentQuestion: Question = try! JSONDecoder().decode([Question].self, from: Data(contentsOf: Bundle.main.url(forResource: "trivia", withExtension: "json")!))[0]
+    var currentQuestion: Question?
     var answers: [String] = []
+    
+    init() {
+        loadInitialQuestion()
+    }
+    
+    private func loadInitialQuestion() {
+        do {
+            guard let url = Bundle.main.url(forResource: "trivia", withExtension: "json") else {
+                print("Error: trivia.json file not found")
+                return
+            }
+            let data = try Data(contentsOf: url)
+            let questions = try JSONDecoder().decode([Question].self, from: data)
+            self.currentQuestion = questions.first
+        } catch {
+            print("Error loading initial question: \(error)")
+        }
+    }
     
     func startGame() {
         activeQuestions = bookQuestions.books
@@ -31,16 +49,27 @@ class GameViewModel {
             answeredQuestions = []
         }
         
-        currentQuestion = activeQuestions.randomElement()!
+        guard let randomQuestion = activeQuestions.randomElement() else {
+            print("Error: No active questions available")
+            return
+        }
         
-        while(answeredQuestions.contains(currentQuestion.id)) {
-            currentQuestion = activeQuestions.randomElement()!
+        currentQuestion = randomQuestion
+        
+        while let current = currentQuestion, answeredQuestions.contains(current.id) {
+            if let newQuestion = activeQuestions.randomElement() {
+                currentQuestion = newQuestion
+            } else {
+                break
+            }
         }
         
         answers = []
-        answers.append(currentQuestion.answer)
-        for answer in currentQuestion.wrongAnswer {
-            answers.append(answer)
+        if let question = currentQuestion {
+            answers.append(question.answer)
+            for answer in question.wrongAnswer {
+                answers.append(answer)
+            }
         }
         
         answers.shuffle()
@@ -48,9 +77,10 @@ class GameViewModel {
     }
     
     func correct() {
-        answeredQuestions.append(currentQuestion.id)
-        
-        gameScore += questionScore
+        if let question = currentQuestion {
+            answeredQuestions.append(question.id)
+            gameScore += questionScore
+        }
     }
     
     func endGame() {

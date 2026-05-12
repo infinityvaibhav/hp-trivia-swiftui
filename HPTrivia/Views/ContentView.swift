@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var audioPlayer: AVAudioPlayer!
     @State private var animateViewIn = false
     @State private var scalePlayButton = false
-    
+    @State private var playGame = false
     
     var body: some View {
         GeometryReader { proxy in
@@ -30,6 +30,7 @@ struct ContentView: View {
                                           x: -proxy.size.height/3)
                         Spacer()
                         PlayButton(animateViewIn: $animateViewIn,
+                                   playGame: $playGame,
                                    scalePlayButton: $scalePlayButton,
                                    y: proxy.size.height/3)
                         Spacer()
@@ -46,10 +47,19 @@ struct ContentView: View {
         .ignoresSafeArea()
         .onAppear {
             animateViewIn = true
-//            playAudioMagicInTheAir()
+            playAudioMagicInTheAir()
             withAnimation(.easeInOut(duration: 1.3).repeatForever()) {
                 scalePlayButton.toggle()
             }
+        }
+        .fullScreenCover(isPresented: $playGame) {
+            GamePlayView()
+                .onAppear {
+                    audioPlayer.setVolume(0, fadeDuration: 2)
+                }
+                .onDisappear {
+                    audioPlayer.setVolume(1, fadeDuration: 3)
+                }
         }
     }
 }
@@ -64,7 +74,7 @@ private extension ContentView {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: URL(filePath: sound))
             audioPlayer.numberOfLoops = -1
-            audioPlayer.play()
+//            audioPlayer.play()
         } catch {
             print("Error while playing audio magic-in-the-air.mp3")
         }
