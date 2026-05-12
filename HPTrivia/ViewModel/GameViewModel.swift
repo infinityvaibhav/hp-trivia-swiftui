@@ -67,7 +67,7 @@ class GameViewModel {
         answers = []
         if let question = currentQuestion {
             answers.append(question.answer)
-            for answer in question.wrongAnswer {
+            for answer in question.wrong {
                 answers.append(answer)
             }
         }

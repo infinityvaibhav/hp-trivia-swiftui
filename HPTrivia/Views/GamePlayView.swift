@@ -16,6 +16,8 @@ struct GamePlayView: View {
     @State private var musicPlayer: AVAudioPlayer!
     @State private var sfxPlayer: AVAudioPlayer!
     
+    @State private var animateView = false
+    
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -29,7 +31,30 @@ struct GamePlayView: View {
                 
                 VStack {
                    // MARK: Controls
+                    HStack {
+                        Button("End Game") {
+                            gameViewModel.endGame()
+                            dismiss()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red.opacity(0.5))
+                        Spacer()
+                        Text("Score: \(gameViewModel.gameScore)")
+                    }
+                    .padding()
+                    .padding(.vertical, 30)
                    // MARK: Questions
+                    VStack {
+                        if animateView {
+                            Text(gameViewModel.currentQuestion!.question)
+                                .font(.custom("PartyLetPlain", size: 50))
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .transition(.scale)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 2), value: animateView)
+                    Spacer()
                    // MARK: Hints
                    // MARK: Answers
                 }
@@ -37,11 +62,15 @@ struct GamePlayView: View {
                 
                 //MARK: Celebration
             }
+            .foregroundStyle(.white)
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .ignoresSafeArea()
         .onAppear {
             gameViewModel.startGame()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                animateView.toggle()
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
 //                playMusic()
             }
