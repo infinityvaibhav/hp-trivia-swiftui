@@ -48,172 +48,195 @@ struct GamePlayView: View {
                     }
                     .padding()
                     .padding(.vertical, 30)
-                    
-                    // MARK: Questions
                     VStack {
-                        if animateView {
-                            Text(gameViewModel.currentQuestion!.question)
-                                .font(.custom("PartyLetPlain", size: 50))
-                                .multilineTextAlignment(.center)
-                                .padding()
-                                .transition(.scale)
-                        }
-                    }
-                    .animation(.easeInOut(duration: 2), value: animateView)
-                    Spacer()
-                    
-                    // MARK: Hints
-                    HStack {
+                        // MARK: Questions
                         VStack {
-                            if animateView {
-                                Image(systemName: "questionmark.app.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100)
-                                    .foregroundStyle(.cyan)
+                            if animateView,
+                               let question = gameViewModel.currentQuestion?.question {
+                                Text(question)
+                                    .font(.custom("PartyLetPlain", size: 50))
+                                    .multilineTextAlignment(.center)
                                     .padding()
-                                    .transition(.offset(x: -proxy.size.width/2))
-                                    .phaseAnimator([false, true]) { content, phase  in
-                                        content.rotationEffect(.degrees(phase ? -13 : -18))
-                                    } animation: { _ in
-                                            .easeInOut(duration: 0.7)
-                                    }.onTapGesture {
-                                        withAnimation(.easeInOut(duration: 1)) {
-                                            revealHint.toggle()
-                                        }
-                                        playFlipAudio()
-                                        gameViewModel.questionScore -= 1
-                                    }
-                                    .rotation3DEffect(.degrees(revealHint ? 1440 : 0), axis: (x: 0, y: 1, z: 0))
-                                    .scaleEffect(revealHint ? 5 : 1)
-                                    .offset(x: revealHint ? proxy.size.width/2 : 0)
-                                    .opacity(revealHint ? 0 : 1)
-                                    .overlay {
-                                        if let hint = gameViewModel.currentQuestion?.hint {
-                                            Text(hint)
-                                                .padding(.leading, 20)
-                                                .minimumScaleFactor(0.5)
-                                                .multilineTextAlignment(.center)
-                                                .opacity(revealHint ? 1  : 0)
-                                                .scaleEffect(revealHint ? 1.33 : 1)
-                                        }
-                                    }
+                                    .transition(.scale)
                             }
                         }
-                        .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
-                        
+                        .animation(.easeInOut(duration: 2), value: animateView)
                         Spacer()
                         
-                        VStack {
-                            if animateView {
-                                Image(systemName: "app.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100)
-                                    .foregroundStyle(.cyan)
-                                    .padding()
-                                    .overlay {
-                                        Image(systemName: "book.closed")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 50)
-                                            .foregroundStyle(.black)
-                                    }
-                                    .transition(.offset(x: proxy.size.width/2))
-                                    .phaseAnimator([false, true]) { content, phase  in
-                                        content.rotationEffect(.degrees(phase ? 13 : 18))
-                                    } animation: { _ in
-                                            .easeInOut(duration: 0.7)
-                                    }.onTapGesture {
-                                        withAnimation(.easeInOut(duration: 1)) {
-                                            revealBook.toggle()
+                        // MARK: Hints
+                        HStack {
+                            VStack {
+                                if animateView {
+                                    Image(systemName: "questionmark.app.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 100)
+                                        .foregroundStyle(.cyan)
+                                        .padding()
+                                        .transition(.offset(x: -proxy.size.width/2))
+                                        .phaseAnimator([false, true]) { content, phase  in
+                                            content.rotationEffect(.degrees(phase ? -13 : -18))
+                                        } animation: { _ in
+                                                .easeInOut(duration: 0.7)
+                                        }.onTapGesture {
+                                            withAnimation(.easeInOut(duration: 1)) {
+                                                revealHint.toggle()
+                                            }
+                                            playFlipAudio()
+                                            gameViewModel.questionScore -= 1
                                         }
-                                        playFlipAudio()
-                                        gameViewModel.questionScore -= 1
-                                    }
-                                    .rotation3DEffect(.degrees(revealBook ? -1440 : 0), axis: (x: 0, y: 1, z: 0))
-                                    .scaleEffect(revealBook ? 5 : 1)
-                                    .offset(x: revealBook ? -proxy.size.width/2 : 0)
-                                    .opacity(revealBook ? 0 : 1)
-                                    .overlay {
-                                        if let book = gameViewModel.currentQuestion?.book {
-                                            Image("hp\(book)")
+                                        .rotation3DEffect(.degrees(revealHint ? 1440 : 0), axis: (x: 0, y: 1, z: 0))
+                                        .scaleEffect(revealHint ? 5 : 1)
+                                        .offset(x: revealHint ? proxy.size.width/2 : 0)
+                                        .opacity(revealHint ? 0 : 1)
+                                        .overlay {
+                                            if let hint = gameViewModel.currentQuestion?.hint {
+                                                Text(hint)
+                                                    .padding(.leading, 20)
+                                                    .minimumScaleFactor(0.5)
+                                                    .multilineTextAlignment(.center)
+                                                    .opacity(revealHint ? 1  : 0)
+                                                    .scaleEffect(revealHint ? 1.33 : 1)
+                                            }
+                                        }
+                                }
+                            }
+                            .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
+                            
+                            Spacer()
+                            
+                            VStack {
+                                if animateView {
+                                    Image(systemName: "app.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 100)
+                                        .foregroundStyle(.cyan)
+                                        .padding()
+                                        .overlay {
+                                            Image(systemName: "book.closed")
                                                 .resizable()
                                                 .scaledToFit()
-                                                .padding(.trailing, 20)
-                                                .opacity(revealBook ? 1  : 0)
-                                                .scaleEffect(revealBook ? 1.33 : 1)
+                                                .frame(width: 50)
+                                                .foregroundStyle(.black)
+                                        }
+                                        .transition(.offset(x: proxy.size.width/2))
+                                        .phaseAnimator([false, true]) { content, phase  in
+                                            content.rotationEffect(.degrees(phase ? 13 : 18))
+                                        } animation: { _ in
+                                                .easeInOut(duration: 0.7)
+                                        }.onTapGesture {
+                                            withAnimation(.easeInOut(duration: 1)) {
+                                                revealBook.toggle()
+                                            }
+                                            playFlipAudio()
+                                            gameViewModel.questionScore -= 1
+                                        }
+                                        .rotation3DEffect(.degrees(revealBook ? -1440 : 0), axis: (x: 0, y: 1, z: 0))
+                                        .scaleEffect(revealBook ? 5 : 1)
+                                        .offset(x: revealBook ? -proxy.size.width/2 : 0)
+                                        .opacity(revealBook ? 0 : 1)
+                                        .overlay {
+                                            if let book = gameViewModel.currentQuestion?.book {
+                                                Image("hp\(book)")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .padding(.trailing, 20)
+                                                    .opacity(revealBook ? 1  : 0)
+                                                    .scaleEffect(revealBook ? 1.33 : 1)
+                                            }
+                                        }
+                                }
+                            }
+                            .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
+                        }
+                        .padding()
+                        
+                        // MARK: Answers
+                        LazyVGrid(columns: [GridItem(), GridItem()]) {
+                            ForEach(gameViewModel.answers, id: \.self) { answer in
+                                if answer == gameViewModel.currentQuestion?.answer {
+                                    VStack {
+                                        if animateView {
+                                            if !tappedCorrectAnswer {
+                                                Button {
+                                                    withAnimation(.easeOut(duration: 1)) {
+                                                        tappedCorrectAnswer.toggle()
+                                                    }
+                                                    playCorrectAnswerAudio()
+                                                    gameViewModel.correct()
+                                                } label: {
+                                                    Text(answer)
+                                                        .minimumScaleFactor(0.5)
+                                                        .multilineTextAlignment(.center)
+                                                        .padding(10)
+                                                        .frame(width: proxy.size.width/2.15, height: 80)
+                                                        .background(.green.opacity(0.5))
+                                                        .clipShape(.rect(cornerRadius: 25))
+                                                        .matchedGeometryEffect(id: 1, in: namespace)
+                                                }
+                                                .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
+                                            }
                                         }
                                     }
-                            }
-                        }
-                        .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
-                    }
-                    .padding()
-                
-                    // MARK: Answers
-                    LazyVGrid(columns: [GridItem(), GridItem()]) {
-                        ForEach(gameViewModel.answers, id: \.self) { answer in
-                            if answer == gameViewModel.currentQuestion?.answer {
-                                VStack {
-                                    if animateView {
-                                        if !tappedCorrectAnswer {
+                                    .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+                                } else {
+                                    VStack {
+                                        if animateView {
                                             Button {
                                                 withAnimation(.easeOut(duration: 1)) {
-                                                    tappedCorrectAnswer.toggle()
+                                                    tappedWrongAnswers.append(answer)
                                                 }
-                                                playCorrectAnswerAudio()
-                                                gameViewModel.correct()
+                                                playWrongAnswerAudio()
+                                                gameViewModel.questionScore -= 1
                                             } label: {
                                                 Text(answer)
                                                     .minimumScaleFactor(0.5)
                                                     .multilineTextAlignment(.center)
                                                     .padding(10)
                                                     .frame(width: proxy.size.width/2.15, height: 80)
-                                                    .background(.green.opacity(0.5))
+                                                    .background(tappedWrongAnswers.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
                                                     .clipShape(.rect(cornerRadius: 25))
-                                                    .matchedGeometryEffect(id: 1, in: namespace)
+                                                    .scaleEffect(tappedWrongAnswers.contains(answer) ? 0.8 : 1)
                                             }
-                                            .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
+                                            .transition(.scale)
+                                            .sensoryFeedback(.error, trigger: tappedWrongAnswers)
+                                            .disabled(tappedWrongAnswers.contains(answer))
                                         }
                                     }
+                                    .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
                                 }
-                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
-                            } else {
-                                VStack {
-                                    if animateView {
-                                        Button {
-                                            withAnimation(.easeOut(duration: 1)) {
-                                                tappedWrongAnswers.append(answer)
-                                            }
-                                            playWrongAnswerAudio()
-                                            gameViewModel.questionScore -= 1
-                                        } label: {
-                                            Text(answer)
-                                                .minimumScaleFactor(0.5)
-                                                .multilineTextAlignment(.center)
-                                                .padding(10)
-                                                .frame(width: proxy.size.width/2.15, height: 80)
-                                                .background(tappedWrongAnswers.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
-                                                .clipShape(.rect(cornerRadius: 25))
-                                                .scaleEffect(tappedWrongAnswers.contains(answer) ? 0.8 : 1)
-                                        }
-                                        .transition(.scale)
-                                        .sensoryFeedback(.error, trigger: tappedWrongAnswers)
-                                        .disabled(tappedWrongAnswers.contains(answer))
-                                    }
-                                }
-                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
                             }
                         }
+                        
+                        Spacer()
                     }
+                    .disabled(tappedCorrectAnswer)
+                    .opacity(tappedCorrectAnswer ? 0.1 : 1)
                     
-                    Spacer()
-                }
-                .frame(width: proxy.size.width, height: proxy.size.height)
+            }.frame(width: proxy.size.width, height: proxy.size.height)
                 
                 //MARK: Celebration
-                VStack {
+                VStack(alignment: .center, spacing: 60) {
+                    VStack {
+                        if tappedCorrectAnswer {
+                            Text("\(gameViewModel.questionScore)")
+                                .font(.largeTitle)
+                                .padding(.top, 50)
+                                .transition(.offset(y: -proxy.size.height/4))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 1).delay(2), value: tappedCorrectAnswer)
+                    
+                    VStack {
+                        if tappedCorrectAnswer {
+                            Text("Brilliant")
+                                .font(.custom("PartyLetPlain", size: 100))
+                                .transition(.scale.combined(with: .offset(y: -proxy.size.height/2)))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 1).delay(1), value: tappedCorrectAnswer)
+                    
                     if tappedCorrectAnswer,
                        let correctAnswer = gameViewModel.currentQuestion?.answer {
                         Text(correctAnswer)
@@ -226,6 +249,20 @@ struct GamePlayView: View {
                             .scaleEffect(2)
                             .matchedGeometryEffect(id: 1, in: namespace)
                     }
+                    
+                    VStack {
+                        if tappedCorrectAnswer {
+                            Button("Next Level>") {
+                                
+                            }
+                            .font(.largeTitle)
+                            .buttonStyle(.borderedProminent)
+                            .tint(.blue.opacity(0.5))
+                            .transition(.offset(y: proxy.size.height/3))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 2.7).delay(2.7),
+                               value: tappedCorrectAnswer)
                 }
             }
             .foregroundStyle(.white)
