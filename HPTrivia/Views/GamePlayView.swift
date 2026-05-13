@@ -19,6 +19,7 @@ struct GamePlayView: View {
     @State private var animateView = false
     @State private var revealHint = false
     @State private var revealBook = false
+    @State private var tappedCorrectAnswer = false
     
     var body: some View {
         GeometryReader { proxy in
@@ -149,6 +150,52 @@ struct GamePlayView: View {
                     .padding()
                 
                     // MARK: Answers
+                    LazyVGrid(columns: [GridItem(), GridItem()]) {
+                        ForEach(gameViewModel.answers, id: \.self) { answer in
+                            if answer == gameViewModel.currentQuestion?.answer {
+                                VStack {
+                                    if animateView {
+                                        Button {
+                                            tappedCorrectAnswer.toggle()
+                                            playCorrectAnswerAudio()
+                                            gameViewModel.correct()
+                                        } label: {
+                                            Text(answer)
+                                                .minimumScaleFactor(0.5)
+                                                .multilineTextAlignment(.center)
+                                                .padding(10)
+                                                .frame(width: proxy.size.width/2.15, height: 80)
+                                                .background(.green.opacity(0.5))
+                                                .clipShape(.rect(cornerRadius: 25))
+                                        }
+                                        .transition(.scale)
+                                    }
+                                }
+                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+                            } else {
+                                VStack {
+                                    if animateView {
+                                        Button {
+                                            
+                                            playWrongAnswerAudio()
+                                            gameViewModel.questionScore -= 1
+                                        } label: {
+                                            Text(answer)
+                                                .minimumScaleFactor(0.5)
+                                                .multilineTextAlignment(.center)
+                                                .padding(10)
+                                                .frame(width: proxy.size.width/2.15, height: 80)
+                                                .background(.green.opacity(0.5))
+                                                .clipShape(.rect(cornerRadius: 25))
+                                        }
+                                        .transition(.scale)
+                                    }
+                                }
+                                .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+                            }
+                        }
+                    }
+                    
                     Spacer()
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
@@ -171,6 +218,7 @@ struct GamePlayView: View {
     }
 }
 
+//MARK: Audio
 private extension GamePlayView {
     
     private func playMusic() {
