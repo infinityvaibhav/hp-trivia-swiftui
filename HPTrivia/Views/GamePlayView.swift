@@ -12,6 +12,7 @@ struct GamePlayView: View {
     
     @Environment(GameViewModel.self) private var gameViewModel
     @Environment(\.dismiss) private var dismiss
+    @Namespace private var namespace
     
     @State private var musicPlayer: AVAudioPlayer!
     @State private var sfxPlayer: AVAudioPlayer!
@@ -20,6 +21,7 @@ struct GamePlayView: View {
     @State private var revealHint = false
     @State private var revealBook = false
     @State private var tappedCorrectAnswer = false
+    @State private var tappedWrongAnswers: [String] = []
     
     var body: some View {
         GeometryReader { proxy in
@@ -155,20 +157,25 @@ struct GamePlayView: View {
                             if answer == gameViewModel.currentQuestion?.answer {
                                 VStack {
                                     if animateView {
-                                        Button {
-                                            tappedCorrectAnswer.toggle()
-                                            playCorrectAnswerAudio()
-                                            gameViewModel.correct()
-                                        } label: {
-                                            Text(answer)
-                                                .minimumScaleFactor(0.5)
-                                                .multilineTextAlignment(.center)
-                                                .padding(10)
-                                                .frame(width: proxy.size.width/2.15, height: 80)
-                                                .background(.green.opacity(0.5))
-                                                .clipShape(.rect(cornerRadius: 25))
+                                        if !tappedCorrectAnswer {
+                                            Button {
+                                                withAnimation(.easeOut(duration: 1)) {
+                                                    tappedCorrectAnswer.toggle()
+                                                }
+                                                playCorrectAnswerAudio()
+                                                gameViewModel.correct()
+                                            } label: {
+                                                Text(answer)
+                                                    .minimumScaleFactor(0.5)
+                                                    .multilineTextAlignment(.center)
+                                                    .padding(10)
+                                                    .frame(width: proxy.size.width/2.15, height: 80)
+                                                    .background(.green.opacity(0.5))
+                                                    .clipShape(.rect(cornerRadius: 25))
+                                                    .matchedGeometryEffect(id: 1, in: namespace)
+                                            }
+                                            .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
                                         }
-                                        .transition(.scale)
                                     }
                                 }
                                 .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
@@ -176,7 +183,9 @@ struct GamePlayView: View {
                                 VStack {
                                     if animateView {
                                         Button {
-                                            
+                                            withAnimation(.easeOut(duration: 1)) {
+                                                tappedWrongAnswers.append(answer)
+                                            }
                                             playWrongAnswerAudio()
                                             gameViewModel.questionScore -= 1
                                         } label: {
@@ -185,10 +194,13 @@ struct GamePlayView: View {
                                                 .multilineTextAlignment(.center)
                                                 .padding(10)
                                                 .frame(width: proxy.size.width/2.15, height: 80)
-                                                .background(.green.opacity(0.5))
+                                                .background(tappedWrongAnswers.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
                                                 .clipShape(.rect(cornerRadius: 25))
+                                                .scaleEffect(tappedWrongAnswers.contains(answer) ? 0.8 : 1)
                                         }
                                         .transition(.scale)
+                                        .sensoryFeedback(.error, trigger: tappedWrongAnswers)
+                                        .disabled(tappedWrongAnswers.contains(answer))
                                     }
                                 }
                                 .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
@@ -201,6 +213,20 @@ struct GamePlayView: View {
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 
                 //MARK: Celebration
+                VStack {
+                    if tappedCorrectAnswer,
+                       let correctAnswer = gameViewModel.currentQuestion?.answer {
+                        Text(correctAnswer)
+                            .minimumScaleFactor(0.5)
+                            .multilineTextAlignment(.center)
+                            .padding(10)
+                            .frame(width: proxy.size.width/2.15, height: 80)
+                            .background(.green.opacity(0.5))
+                            .clipShape(.rect(cornerRadius: 25))
+                            .scaleEffect(2)
+                            .matchedGeometryEffect(id: 1, in: namespace)
+                    }
+                }
             }
             .foregroundStyle(.white)
             .frame(width: proxy.size.width, height: proxy.size.height)
