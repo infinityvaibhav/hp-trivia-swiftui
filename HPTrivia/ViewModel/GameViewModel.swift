@@ -19,8 +19,11 @@ class GameViewModel {
     var currentQuestion: Question?
     var answers: [String] = []
     
+    let savePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "RecentScores")
+    
     init() {
         loadInitialQuestion()
+        loadScores()
     }
     
     private func loadInitialQuestion() {
@@ -89,9 +92,28 @@ class GameViewModel {
         recentScores[2] = recentScores[1]
         recentScores[1] = recentScores[0]
         recentScores[0] = gameScore
+        saveSocres()
         
         gameScore = 0
         activeQuestions = []
         answeredQuestions = []
+    }
+    
+    func saveSocres() {
+        do {
+            let data = try JSONEncoder().encode(recentScores)
+            try data.write(to: savePath)
+        } catch {
+            print("Unable to save data: \(error)")
+        }
+    }
+    
+    func loadScores() {
+        do {
+            let data = try Data(contentsOf: savePath)
+            recentScores = try JSONDecoder().decode([Int].self, from: data)
+        } catch {
+            recentScores = [0, 0, 0]
+        }
     }
 }
