@@ -21,6 +21,7 @@ struct GamePlayView: View {
     @State private var revealHint = false
     @State private var revealBook = false
     @State private var tappedCorrectAnswer = false
+    @State private var movePointsToScore = false
     @State private var tappedWrongAnswers: [String] = []
     
     var body: some View {
@@ -153,61 +154,7 @@ struct GamePlayView: View {
                         .padding()
                         
                         // MARK: Answers
-                        LazyVGrid(columns: [GridItem(), GridItem()]) {
-                            ForEach(gameViewModel.answers, id: \.self) { answer in
-                                if answer == gameViewModel.currentQuestion?.answer {
-                                    VStack {
-                                        if animateView {
-                                            if !tappedCorrectAnswer {
-                                                Button {
-                                                    withAnimation(.easeOut(duration: 1)) {
-                                                        tappedCorrectAnswer.toggle()
-                                                    }
-                                                    playCorrectAnswerAudio()
-                                                    gameViewModel.correct()
-                                                } label: {
-                                                    Text(answer)
-                                                        .minimumScaleFactor(0.5)
-                                                        .multilineTextAlignment(.center)
-                                                        .padding(10)
-                                                        .frame(width: proxy.size.width/2.15, height: 80)
-                                                        .background(.green.opacity(0.5))
-                                                        .clipShape(.rect(cornerRadius: 25))
-                                                        .matchedGeometryEffect(id: 1, in: namespace)
-                                                }
-                                                .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
-                                            }
-                                        }
-                                    }
-                                    .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
-                                } else {
-                                    VStack {
-                                        if animateView {
-                                            Button {
-                                                withAnimation(.easeOut(duration: 1)) {
-                                                    tappedWrongAnswers.append(answer)
-                                                }
-                                                playWrongAnswerAudio()
-                                                gameViewModel.questionScore -= 1
-                                            } label: {
-                                                Text(answer)
-                                                    .minimumScaleFactor(0.5)
-                                                    .multilineTextAlignment(.center)
-                                                    .padding(10)
-                                                    .frame(width: proxy.size.width/2.15, height: 80)
-                                                    .background(tappedWrongAnswers.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
-                                                    .clipShape(.rect(cornerRadius: 25))
-                                                    .scaleEffect(tappedWrongAnswers.contains(answer) ? 0.8 : 1)
-                                            }
-                                            .transition(.scale)
-                                            .sensoryFeedback(.error, trigger: tappedWrongAnswers)
-                                            .disabled(tappedWrongAnswers.contains(answer))
-                                        }
-                                    }
-                                    .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
-                                }
-                            }
-                        }
+                        answersGridView(width: proxy.size.width/2.15)
                         
                         Spacer()
                     }
@@ -215,55 +162,8 @@ struct GamePlayView: View {
                     .opacity(tappedCorrectAnswer ? 0.1 : 1)
                     
             }.frame(width: proxy.size.width, height: proxy.size.height)
-                
                 //MARK: Celebration
-                VStack(alignment: .center, spacing: 60) {
-                    VStack {
-                        if tappedCorrectAnswer {
-                            Text("\(gameViewModel.questionScore)")
-                                .font(.largeTitle)
-                                .padding(.top, 50)
-                                .transition(.offset(y: -proxy.size.height/4))
-                        }
-                    }
-                    .animation(.easeInOut(duration: 1).delay(2), value: tappedCorrectAnswer)
-                    
-                    VStack {
-                        if tappedCorrectAnswer {
-                            Text("Brilliant")
-                                .font(.custom("PartyLetPlain", size: 100))
-                                .transition(.scale.combined(with: .offset(y: -proxy.size.height/2)))
-                        }
-                    }
-                    .animation(.easeInOut(duration: 1).delay(1), value: tappedCorrectAnswer)
-                    
-                    if tappedCorrectAnswer,
-                       let correctAnswer = gameViewModel.currentQuestion?.answer {
-                        Text(correctAnswer)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.center)
-                            .padding(10)
-                            .frame(width: proxy.size.width/2.15, height: 80)
-                            .background(.green.opacity(0.5))
-                            .clipShape(.rect(cornerRadius: 25))
-                            .scaleEffect(2)
-                            .matchedGeometryEffect(id: 1, in: namespace)
-                    }
-                    
-                    VStack {
-                        if tappedCorrectAnswer {
-                            Button("Next Level>") {
-                                
-                            }
-                            .font(.largeTitle)
-                            .buttonStyle(.borderedProminent)
-                            .tint(.blue.opacity(0.5))
-                            .transition(.offset(y: proxy.size.height/3))
-                        }
-                    }
-                    .animation(.easeInOut(duration: 2.7).delay(2.7),
-                               value: tappedCorrectAnswer)
-                }
+                celebrationView(proxy: proxy)
             }
             .foregroundStyle(.white)
             .frame(width: proxy.size.width, height: proxy.size.height)
@@ -278,6 +178,151 @@ struct GamePlayView: View {
 //                playMusic()
             }
         }
+    }
+}
+
+extension GamePlayView {
+    
+    func answersGridView(width: Double) -> some View {
+        LazyVGrid(columns: [GridItem(), GridItem()]) {
+            ForEach(gameViewModel.answers, id: \.self) { answer in
+                if answer == gameViewModel.currentQuestion?.answer {
+                    correctAnswerButtonView(width: width, answer: answer)
+                } else {
+                    wrongAnswerButtonView(width: width, answer: answer)
+                }
+            }
+        }
+    }
+    
+    func correctAnswerButtonView(width: Double, answer: String) -> some View {
+        VStack {
+            if animateView {
+                if !tappedCorrectAnswer {
+                    Button {
+                        withAnimation(.easeOut(duration: 1)) {
+                            tappedCorrectAnswer.toggle()
+                        }
+                        playCorrectAnswerAudio()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                            gameViewModel.correct()
+                        }
+                    } label: {
+                        Text(answer)
+                            .minimumScaleFactor(0.5)
+                            .multilineTextAlignment(.center)
+                            .padding(10)
+                            .frame(width: width, height: 80)
+                            .background(.green.opacity(0.5))
+                            .clipShape(.rect(cornerRadius: 25))
+                            .matchedGeometryEffect(id: 1, in: namespace)
+                    }
+                    .transition(.asymmetric(insertion: .scale, removal: .scale(scale: 15).combined(with: .opacity)))
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+    }
+    
+    func wrongAnswerButtonView(width: Double, answer: String) -> some View {
+        VStack {
+            if animateView {
+                Button {
+                    withAnimation(.easeOut(duration: 1)) {
+                        tappedWrongAnswers.append(answer)
+                    }
+                    playWrongAnswerAudio()
+                    gameViewModel.questionScore -= 1
+                } label: {
+                    Text(answer)
+                        .minimumScaleFactor(0.5)
+                        .multilineTextAlignment(.center)
+                        .padding(10)
+                        .frame(width: width, height: 80)
+                        .background(tappedWrongAnswers.contains(answer) ? .red.opacity(0.5) : .green.opacity(0.5))
+                        .clipShape(.rect(cornerRadius: 25))
+                        .scaleEffect(tappedWrongAnswers.contains(answer) ? 0.8 : 1)
+                }
+                .transition(.scale)
+                .sensoryFeedback(.error, trigger: tappedWrongAnswers)
+                .disabled(tappedWrongAnswers.contains(answer))
+            }
+        }
+        .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+    }
+    
+    
+    func celebrationView(proxy: GeometryProxy) -> some View {
+        VStack(alignment: .center, spacing: 60) {
+            VStack {
+                if tappedCorrectAnswer {
+                    Text("\(gameViewModel.questionScore)")
+                        .font(.largeTitle)
+                        .padding(.top, 50)
+                        .transition(.offset(y: -proxy.size.height/4))
+                        .offset(x: movePointsToScore ? proxy.size.width/2.3 : 0,
+                                y: movePointsToScore ? -proxy.size.height/5 : 0)
+                        .opacity(movePointsToScore ? 0 : 1)
+                        .onAppear {
+                            withAnimation(.easeInOut(duration: 1).delay(3)) {
+                                movePointsToScore.toggle()
+                            }
+                        }
+                }
+            }
+            .animation(.easeInOut(duration: 1).delay(2), value: tappedCorrectAnswer)
+            
+            brilliantView(yOffset: -proxy.size.height/2)
+            
+            if tappedCorrectAnswer,
+               let correctAnswer = gameViewModel.currentQuestion?.answer {
+                Text(correctAnswer)
+                    .minimumScaleFactor(0.5)
+                    .multilineTextAlignment(.center)
+                    .padding(10)
+                    .frame(width: proxy.size.width/2.15, height: 80)
+                    .background(.green.opacity(0.5))
+                    .clipShape(.rect(cornerRadius: 25))
+                    .scaleEffect(2)
+                    .matchedGeometryEffect(id: 1, in: namespace)
+            }
+            
+            nextLevelButtonView(yOffset: proxy.size.height/3)
+        }
+    }
+    
+    func brilliantView(yOffset: Double) -> some View {
+        VStack {
+            if tappedCorrectAnswer {
+                Text("Brilliant")
+                    .font(.custom("PartyLetPlain", size: 100))
+                    .transition(.scale.combined(with: .offset(y: yOffset)))
+            }
+        }
+        .animation(.easeInOut(duration: 1).delay(1), value: tappedCorrectAnswer)
+    }
+    
+    func nextLevelButtonView(yOffset: Double) -> some View {
+        VStack {
+            if tappedCorrectAnswer {
+                Button("Next Level>") {
+                    
+                }
+                .font(.largeTitle)
+                .buttonStyle(.borderedProminent)
+                .tint(.blue.opacity(0.5))
+                .transition(.offset(y: yOffset))
+                .phaseAnimator([false, true]) { content, phase in
+                    content
+                        .scaleEffect(phase ? 1.2 : 1)
+                } animation: { _ in
+                        .easeInOut(duration: 1.3)
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 2.7).delay(2.7),
+                   value: tappedCorrectAnswer)
     }
 }
 

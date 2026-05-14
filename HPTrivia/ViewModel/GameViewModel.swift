@@ -79,7 +79,9 @@ class GameViewModel {
     func correct() {
         if let question = currentQuestion {
             answeredQuestions.append(question.id)
-            gameScore += questionScore
+            withAnimation {
+                gameScore += questionScore
+            }
         }
     }
     
