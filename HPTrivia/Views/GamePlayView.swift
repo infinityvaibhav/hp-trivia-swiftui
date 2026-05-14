@@ -61,7 +61,7 @@ struct GamePlayView: View {
                                     .transition(.scale)
                             }
                         }
-                        .animation(.easeInOut(duration: 2), value: animateView)
+                        .animation(.easeInOut(duration: animateView ? 2 : 0), value: animateView)
                         Spacer()
                         
                         // MARK: Hints
@@ -102,7 +102,7 @@ struct GamePlayView: View {
                                         }
                                 }
                             }
-                            .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
+                            .animation(.easeInOut(duration: animateView ? 1.5 : 0).delay(animateView ? 2 : 0), value: animateView)
                             
                             Spacer()
                             
@@ -149,7 +149,7 @@ struct GamePlayView: View {
                                         }
                                 }
                             }
-                            .animation(.easeInOut(duration: 1.5).delay(2), value: animateView)
+                            .animation(.easeInOut(duration: animateView ? 1.5 : 0).delay(animateView ? 2 : 0), value: animateView)
                         }
                         .padding()
                         
@@ -222,7 +222,7 @@ extension GamePlayView {
                 }
             }
         }
-        .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+        .animation(.easeInOut(duration: animateView ? 1 : 0).delay(animateView ? 1.5 : 0), value: animateView)
     }
     
     func wrongAnswerButtonView(width: Double, answer: String) -> some View {
@@ -249,7 +249,7 @@ extension GamePlayView {
                 .disabled(tappedWrongAnswers.contains(answer))
             }
         }
-        .animation(.easeInOut(duration: 1).delay(1.5), value: animateView)
+        .animation(.easeInOut(duration: animateView ? 1 : 0).delay(animateView ? 1.5 : 0), value: animateView)
     }
     
     
@@ -300,14 +300,27 @@ extension GamePlayView {
                     .transition(.scale.combined(with: .offset(y: yOffset)))
             }
         }
-        .animation(.easeInOut(duration: 1).delay(1), value: tappedCorrectAnswer)
+        .animation(
+            .easeInOut(duration: tappedCorrectAnswer ? 1 : 0)
+            .delay(tappedCorrectAnswer ? 1 : 0),
+            value: tappedCorrectAnswer
+        )
     }
     
     func nextLevelButtonView(yOffset: Double) -> some View {
         VStack {
             if tappedCorrectAnswer {
                 Button("Next Level>") {
-                    
+                    animateView = false
+                    revealHint = false
+                    revealBook = false
+                    tappedCorrectAnswer = false
+                    movePointsToScore = false
+                    tappedWrongAnswers = []
+                    gameViewModel.newQuestion()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        animateView.toggle()
+                    }
                 }
                 .font(.largeTitle)
                 .buttonStyle(.borderedProminent)
@@ -321,8 +334,11 @@ extension GamePlayView {
                 }
             }
         }
-        .animation(.easeInOut(duration: 2.7).delay(2.7),
-                   value: tappedCorrectAnswer)
+        .animation(
+            .easeInOut(duration: tappedCorrectAnswer ? 2.7 : 0)
+            .delay(tappedCorrectAnswer ?  2.7 : 0),
+            value: tappedCorrectAnswer
+        )
     }
 }
 
