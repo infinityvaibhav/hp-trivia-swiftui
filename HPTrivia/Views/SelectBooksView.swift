@@ -13,6 +13,8 @@ struct SelectBooksView: View {
     
     @Environment(GameViewModel.self) var gameViewModel
     
+    private var storeViewModel = StoreViewModel()
+    
     @State var showTempAlert = false
     
     var body: some View {
@@ -78,6 +80,9 @@ struct SelectBooksView: View {
         }
         .interactiveDismissDisabled(!activeBooks)
         .alert("You purchased a new question pack.", isPresented: $showTempAlert) {}
+        .task {
+            await storeViewModel.loadProducts()
+        }
     }
     
     var activeBooks: Bool {
