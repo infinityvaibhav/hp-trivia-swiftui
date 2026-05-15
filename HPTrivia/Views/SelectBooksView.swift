@@ -48,13 +48,27 @@ struct SelectBooksView: View {
                                         gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
                                     }
                             case .locked:
-                                SelectBookCellView(book: book,
-                                                   bookStatusImage: "lock.fill",
-                                                   opacity: 0.5)
+                                if storeViewModel.purchased.contains(book.image) {
+                                    SelectBookCellView(book: book,
+                                                       bookStatusImage: "checkmark.circle.fill",
+                                                       opacity: 0)
                                     .onTapGesture {
-                                        showTempAlert.toggle()
+                                        gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .inactive)
+                                    }
+                                    .task {
                                         gameViewModel.bookQuestions.changeBookStatus(of: book.id, to: .active)
                                     }
+                                } else {
+                                    SelectBookCellView(book: book,
+                                                       bookStatusImage: "lock.fill",
+                                                       opacity: 0.5)
+                                    .onTapGesture {
+                                        let product = storeViewModel.products[book.id-4]
+                                        Task {
+                                            await storeViewModel.purchase(product)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -79,7 +93,6 @@ struct SelectBooksView: View {
             }
         }
         .interactiveDismissDisabled(!activeBooks)
-        .alert("You purchased a new question pack.", isPresented: $showTempAlert) {}
         .task {
             await storeViewModel.loadProducts()
         }
