@@ -15,6 +15,10 @@ class StoreViewModel {
     
     private var updates: Task<Void, Never>? = nil
     
+    init() {
+        self.updates = watchForUpdates()
+    }
+    
     // MARK: Load available products
     func loadProducts() async {
         do {
@@ -58,7 +62,30 @@ class StoreViewModel {
     }
     
     // TODO: Check for purchased product
+    func checkPurchased() async {
+        for product in products {
+            guard let status = await product.currentEntitlement else { continue }
+            
+            switch status {
+            case .unverified(let signedType, let verificationError):
+                print("Error on \(signedType): \(verificationError)")
+            case .verified(let signedType):
+                // product was purchased but somehow it was not cancelled or refunded and should be in purchased list else remove it
+                if signedType.revocationDate == nil {
+                    purchased.insert(signedType.productID)
+                } else {
+                    purchased.remove(signedType.productID)
+                }
+            }
+        }
+    }
     
     // TODO: Connect with App Store to watch for purchase and transaction updates
-    
+    func watchForUpdates() -> Task<Void, Never> {
+        Task(priority: .background) {
+            for await _ in Transaction.updates {
+                await checkPurchased()
+            }
+        }
+    }
 }
