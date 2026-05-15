@@ -27,9 +27,9 @@ App Development plan
  ✅ Celebration
  ✅ Audio
  ✅ Animations
- - In App purchaes
- - Store
+ ✅ In App purchaes
+ ✅ Store
  ✅ Instructions screen
- 🟨 Books
+ ✅🟨 Books
  ✅ Persist scores
 */

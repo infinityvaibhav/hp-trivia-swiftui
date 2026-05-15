@@ -74,7 +74,7 @@ private extension ContentView {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: URL(filePath: sound))
             audioPlayer.numberOfLoops = -1
-//            audioPlayer.play()
+            audioPlayer.play()
         } catch {
             print("Error while playing audio magic-in-the-air.mp3")
         }
